@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  title: JavaFlix API
+  description: API REST para a plataforma acadêmica de streaming JavaFlix.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api
+    description: Servidor de desenvolvimento local
+
+paths:
+  /catalogo:
+    get:
+      summary: Retorna todo o catálogo de filmes e séries
+      responses:
+        '200':
+          description: Sucesso. Retorna lista de conteúdos.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Conteudo'
+        '500':
+          description: Erro interno no servidor.
+
+  /buscar:
+    get:
+      summary: Busca um conteúdo específico no catálogo
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          required: true
+          description: Título ou termo a ser pesquisado
+      responses:
+        '200':
+          description: Conteúdo encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conteudo'
+        '400':
+          description: Parâmetro inválido ou ausente.
+        '404':
+          description: Conteúdo não encontrado.
+
+  /recomendacoes:
+    get:
+      summary: Retorna conteúdos recomendados processados de forma assíncrona
+      responses:
+        '200':
+          description: Lista de recomendações
+          
+  /transcodificar:
+    post:
+      summary: Inicia simulação de transcodificação de vídeo paralela (CPU-bound)
+      responses:
+        '202':
+          description: Transcodificação iniciada
+          
+  /notificacoes:
+    post:
+      summary: Dispara envio de notificações aos usuários de forma distribuída (I/O-bound)
+      responses:
+        '202':
+          description: Notificações em fila
+
+components:
+  schemas:
+    Conteudo:
+      type: object
+      properties:
+        titulo:
+          type: string
+        genero:
+          type: string
+        classificacao:
+          type: integer
+        tipo:
+          type: string
+          enum: [Filme, Serie]

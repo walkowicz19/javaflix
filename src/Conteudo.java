@@ -1,40 +1,32 @@
-public abstract class Conteudo implements Avaliavel {
+public abstract class Conteudo {
     // Atributos (R2)
     private String titulo;
     private String genero;
-    private int classificacaoEtaria; 
-    
-    // Novos atributos para a Interface
-    private double somaAvaliacoes;
-    private int totalAvaliacoes;
+    private int classificacaoEtaria; // Ex: 10, 12, 16, 18 anos
 
     public Conteudo(String titulo, String genero, int classificacaoEtaria) {
-        this.titulo = titulo;
-        this.genero = genero;
+        if (titulo == null || titulo.trim().isEmpty()) {
+            throw new IllegalArgumentException("Título não pode ser vazio");
+        }
+        if (genero == null || genero.trim().isEmpty()) {
+            throw new IllegalArgumentException("Gênero não pode ser vazio");
+        }
+        if (classificacaoEtaria < 0 || classificacaoEtaria > 18) {
+            throw new IllegalArgumentException("Classificação etária inválida");
+        }
+        this.titulo = titulo.trim();
+        this.genero = genero.trim();
         this.classificacaoEtaria = classificacaoEtaria;
-        this.somaAvaliacoes = 0;
-        this.totalAvaliacoes = 0;
     }
 
-    // Método Abstrato (R6 - Polimorfismo)
+    // Método Abstrato (R6 - Polimorfismo):
+    // Cada tipo de conteúdo calcula sua duração total de jeito diferente.
     public abstract int getDuracaoTotalEmMinutos();
 
-    // Implementação da Interface Avaliavel
-    @Override
-    public void avaliar(double nota) {
-        this.somaAvaliacoes += nota;
-        this.totalAvaliacoes++;
-    }
-
-    @Override
-    public double getMediaAvaliacoes() {
-        if (totalAvaliacoes == 0) return 0;
-        return somaAvaliacoes / totalAvaliacoes;
-    }
-
+    // Método comum a todos
     public String getDetalhesBasicos() {
-        return String.format("Título: %s | Gênero: %s | Classificação: +%d anos | ⭐ %.1f",
-                titulo, genero, classificacaoEtaria, getMediaAvaliacoes());
+        return String.format("Título: %s | Gênero: %s | Classificação: +%d anos",
+                titulo, genero, classificacaoEtaria);
     }
 
     // Getters

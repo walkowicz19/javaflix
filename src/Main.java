@@ -1,3 +1,4 @@
+
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
@@ -10,124 +11,138 @@ public class Main {
 
     public static void main(String[] args) {
         inicializarSistema();
+
         int opcao = 0;
         do {
             exibirMenu();
             opcao = lerInteiro("Escolha uma opção: ");
 
-            try {
+            try { // Bloco Try-Catch Principal (R7)
                 switch (opcao) {
-                    case 1: listarTudo(); break;
-                    case 2: buscarEAssistir(); break;
-                    case 3: filtrarConteudo(); break; // Atualizado para usar Sobrecarga
-                    case 4: trocarUsuario(); break;
-                    case 5: avaliarTitulo(); break; // Nova opção da Interface
-                    case 6: System.out.println("Encerrando..."); break;
-                    default: System.out.println("Opção inválida!");
+                    case 1:
+                        listarTudo();
+                        break;
+                    case 2:
+                        buscarEAssistir();
+                        break;
+                    case 3:
+                        filtrarPorGenero();
+                        break;
+                    case 4:
+                        trocarUsuario();
+                        break;
+                    case 5:
+                        System.out.println("Encerrando Stream... Até logo!");
+                        break;
+                    default:
+                        System.out.println("Opção inválida!");
                 }
+            } catch (ConteudoNaoEncontradoException e) {
+                System.err.println("🔍 ERRO DE BUSCA: " + e.getMessage());
+            } catch (ClassificacaoIndicativaException e) {
+                System.err.println("🔞 BLOQUEIO PARENTAL: " + e.getMessage());
             } catch (Exception e) {
-                System.err.println("ERRO: " + e.getMessage());
+                System.err.println("❌ ERRO INESPERADO: " + e.getMessage());
             }
 
-            if (opcao != 6) {
-                System.out.println("\n[Enter] para continuar...");
+            if (opcao != 5) {
+                System.out.println("\nPressione Enter para continuar...");
                 scanner.nextLine();
             }
 
-        } while (opcao != 6);
+        } while (opcao != 5);
+
         scanner.close();
     }
 
     private static void inicializarSistema() {
         netflixClone = new PlataformaStreaming("JavaFlix");
-        // Filmes
+
+        // Populando o catálogo com Filmes e Séries (Polimorfismo na prática)
         netflixClone.adicionarConteudo(new Filme("O Poderoso Chefão", "Drama", 16, 175, "Coppola"));
         netflixClone.adicionarConteudo(new Filme("Shrek", "Animação", 0, 90, "Andrew Adamson"));
-        // Séries
+        netflixClone.adicionarConteudo(new Filme("Matrix", "Ficção", 14, 136, "Wachowski"));
+
         netflixClone.adicionarConteudo(new Serie("Breaking Bad", "Drama", 18, 5, 13, 50));
         netflixClone.adicionarConteudo(new Serie("Stranger Things", "Ficção", 14, 4, 8, 60));
-        
+
+        // Cria usuário padrão
         usuarioLogado = new Usuario("Visitante", 18, true);
     }
 
     private static void exibirMenu() {
-        System.out.println("\n=== JavaFlix (" + usuarioLogado.getNome() + ") ===");
-        System.out.println("1. Ver Catálogo");
-        System.out.println("2. Assistir");
-        System.out.println("3. Filtrar (Sobrecarga)");
-        System.out.println("4. Trocar Usuário");
-        System.out.println("5. Avaliar Título (Interface)");
-        System.out.println("6. Sair");
+        System.out.println("\n=== " + "JavaFlix" + " ===");
+        System.out.println("Usuário: " + usuarioLogado.getNome() + " | Idade: " + usuarioLogado.getIdade() + " | Plano: " + usuarioLogado.getTipoAssinatura());
+        System.out.println("-------------------------");
+        System.out.println("1. Ver Catálogo Completo");
+        System.out.println("2. Buscar Título e Assistir");
+        System.out.println("3. Filtrar por Gênero");
+        System.out.println("4. Trocar Usuário (Simular Idade)");
+        System.out.println("5. Sair");
+        System.out.println("-------------------------");
     }
 
     private static void listarTudo() {
         netflixClone.listarCatalogo();
     }
 
-    private static void buscarEAssistir() throws Exception {
-        System.out.print("Nome do título: ");
+    private static void buscarEAssistir() throws ConteudoNaoEncontradoException, ClassificacaoIndicativaException {
+        System.out.print("Digite o nome do Filme/Série: ");
         String nome = scanner.nextLine();
+
+        // Busca (pode lançar ConteudoNaoEncontradoException)
         Conteudo c = netflixClone.buscar(nome);
+
+        System.out.println("Conteúdo encontrado: " + c.getDetalhesBasicos());
+
+        // Tenta assistir (pode lançar ClassificacaoIndicativaException)
         netflixClone.assistirConteudo(usuarioLogado, c);
     }
 
-    // Demonstração da Sobrecarga (Requisito 4)
-    private static void filtrarConteudo() {
-        System.out.println("Filtrar por: [1] Gênero | [2] Idade Máxima");
-        int tipo = lerInteiro("Opção: ");
+    private static void filtrarPorGenero() throws ConteudoNaoEncontradoException {
+        System.out.print("Digite o gênero (Drama, Ficção, Animação): ");
+        String genero = scanner.nextLine();
 
-        List<Conteudo> resultado;
-        
-        if (tipo == 1) {
-            System.out.print("Digite o gênero: ");
-            String genero = scanner.nextLine();
-            // Chama filtrar(String)
-            resultado = netflixClone.filtrar(genero); 
-        } else {
-            int idade = lerInteiro("Idade máxima permitida: ");
-            // Chama filtrar(int) - MESMO NOME, PARÂMETRO DIFERENTE
-            resultado = netflixClone.filtrar(idade); 
+        List<Conteudo> lista = netflixClone.filtrar(genero);
+
+        System.out.println("\n--- Gênero: " + genero + " ---");
+        for (Conteudo c : lista) {
+            System.out.println("- " + c.getTitulo() + " (Classificação: " + c.getClassificacaoEtaria() + ")");
         }
-
-        System.out.println("\n--- Resultados do Filtro ---");
-        if(resultado.isEmpty()) System.out.println("Nada encontrado.");
-        for (Conteudo c : resultado) {
-            System.out.println("- " + c.getTitulo() + " (" + c.getDetalhesBasicos() + ")");
-        }
-    }
-
-    // Demonstração da Interface (Requisito 6/Extra)
-    private static void avaliarTitulo() throws Exception {
-        System.out.print("Qual título deseja avaliar? ");
-        String nome = scanner.nextLine();
-        Conteudo c = netflixClone.buscar(nome);
-        
-        System.out.print("Nota (0-10): ");
-        double nota = scanner.nextDouble();
-        scanner.nextLine(); // limpar buffer
-
-        c.avaliar(nota); // Método da Interface Avaliavel
-        System.out.println("Avaliação registrada! Nova média: " + c.getMediaAvaliacoes());
     }
 
     private static void trocarUsuario() {
-        System.out.print("Nome: ");
+        System.out.println("--- Trocar Usuário ---");
+        System.out.print("Novo Nome: ");
         String nome = scanner.nextLine();
-        int idade = lerInteiro("Idade: ");
-        usuarioLogado = new Usuario(nome, idade);
-        System.out.println("Usuário trocado!");
+        int idade = lerInteiro("Nova Idade: ");
+
+        System.out.println("Escolha o plano:");
+        System.out.println("1. Básico (Grátis)");
+        System.out.println("2. Premium (Pago)");
+        int op = lerInteiro("Opção: ");
+        boolean isPremium = (op == 2);
+
+        // Uso da Sobrecarga do Construtor
+        if (op == 1) {
+            usuarioLogado = new Usuario(nome, idade); // Chama construtor 1
+        } else {
+            usuarioLogado = new Usuario(nome, idade, true); // Chama construtor 2
+        }
+        System.out.println("Usuário alterado com sucesso!");
     }
 
+    // Função auxiliar segura para ler inteiros
     private static int lerInteiro(String prompt) {
         while (true) {
             try {
                 System.out.print(prompt);
-                int v = scanner.nextInt();
-                scanner.nextLine();
-                return v;
+                int valor = scanner.nextInt();
+                scanner.nextLine(); // Limpar buffer
+                return valor;
             } catch (InputMismatchException e) {
-                System.out.println("Digite um número válido.");
-                scanner.nextLine();
+                System.out.println("Erro: Digite apenas números inteiros.");
+                scanner.nextLine(); // Limpar buffer do erro
             }
         }
     }

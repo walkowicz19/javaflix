@@ -19,7 +19,14 @@ export const getCatalogo = async (): Promise<Conteudo[]> => {
 
 export const buscarConteudo = async (query: string): Promise<Conteudo | null> => {
     try {
-        const response = await api.get(`/buscar?q=${query}`);
+        // Sanitize and validate input
+        const sanitized = query.trim();
+        if (!sanitized || sanitized.length > 100) {
+            throw new Error("Invalid search query");
+        }
+        
+        // Use encodeURIComponent to prevent injection
+        const response = await api.get(`/buscar?q=${encodeURIComponent(sanitized)}`);
         return response.data;
     } catch (error) {
         console.error("Erro ao buscar conteúdo:", error);
