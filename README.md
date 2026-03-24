@@ -4,15 +4,35 @@ This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
 If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
 
-## Running the application in dev mode
+### 1. Inicializar o Back-end (Quarkus)
 
-You can run your application in dev mode that enables live coding using:
+1. Certifique-se de ter o **Java JDK 17+** instalado.
+2. Navegue até o diretório raiz do projeto:
+   ```bash
+   cd "c:\Users\user\Downloads\Streaming App"
+   ```
+3. Instale o Maven (caso não tenha) e baixe as dependências rodando a API em modo de desenvolvimento com live-reload:
+   ```bash
+   mvn quarkus:dev
+   ```
+4. O servidor estará rodando nativamente na porta **8080** interceptando todas as rotas em `/api`.
 
-```shell script
-./mvnw quarkus:dev
-```
+### 2. Inicializar o Front-end
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+1. Certifique-se de ter o **Node.js** instalado.
+2. Navegue até o diretório do front-end:
+   ```bash
+   cd "c:\Users\user\Downloads\Streaming App\frontend"
+   ```
+3. Instale as dependências:
+   ```bash
+   npm install
+   ```
+4. Inicie o servidor de desenvolvimento:
+   ```bash
+   npm run dev
+   ```
+5. O front-end estará disponível em **http://localhost:5173**.
 
 ## Packaging and running the application
 
