@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useState, useEffect } from 'react';
+import { Play, Info, Search } from 'lucide-react';
 import { Navbar } from "./components/Navbar";
 import { Hero } from "./components/Hero";
 import { Row } from "./components/Row";

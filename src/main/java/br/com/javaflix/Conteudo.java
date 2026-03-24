@@ -30,8 +30,15 @@ public abstract class Conteudo {
                 titulo, genero, classificacaoEtaria);
     }
 
-    // Getters
+    // Getters para a serialização JSON nativa (comunicação com Front-end React)
     public String getTitulo() { return titulo; }
     public String getGenero() { return genero; }
     public int getClassificacaoEtaria() { return classificacaoEtaria; }
+    
+    // Mapeamento necessário para substituir o antigo conteudoToJson do HttpServer
+    public int getClassificacao() { return classificacaoEtaria; }
+    
+    public String getTipo() { 
+        return this.getClass().getSimpleName().equals("Filme") ? "Filme" : "Serie"; 
+    }
 }

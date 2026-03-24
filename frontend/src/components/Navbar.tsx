@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Search, Bell, User } from "lucide-react";
+import { Search, Bell } from "lucide-react";
 
 export const Navbar: React.FC<{
   onSearch: () => void;
