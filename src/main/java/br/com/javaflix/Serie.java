@@ -1,3 +1,4 @@
+package br.com.javaflix;
 public class Serie extends Conteudo {
 
     private int temporadas;

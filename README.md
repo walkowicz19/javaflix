@@ -1,84 +1,62 @@
-# JavaFlix - Guia de Inicialização
+# streaming-api
 
-## Introdução
+This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
-JavaFlix é uma aplicação de streaming que combina um front-end moderno com um back-end em Java. Este guia explica como iniciar o front-end e o back-end para executar a aplicação completa.
+If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
 
-## Tecnologias Utilizadas
+## Running the application in dev mode
 
-### Front-end
+You can run your application in dev mode that enables live coding using:
 
-- **React**: Biblioteca JavaScript para construção de interfaces de usuário.
-- **Tailwind CSS**: Framework de CSS para estilização.
-- **Vite**: Ferramenta de build rápida para projetos front-end.
+```shell script
+./mvnw quarkus:dev
+```
 
-### Back-end
+> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
 
-- **Java**: Linguagem de programação para o servidor.
-- **HttpServer**: Servidor HTTP embutido do Java.
+## Packaging and running the application
 
-### Dependências
+The application can be packaged using:
 
-- **Axios**: Biblioteca para requisições HTTP no front-end.
-- **Lucide-react**: Ícones para React.
+```shell script
+./mvnw package
+```
 
-## Passos para Inicialização
+It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
+Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
 
-### 1. Inicializar o Back-end
+The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
 
-1. Certifique-se de ter o **Java JDK** instalado.
-2. Navegue até o diretório do back-end:
-   ```bash
-   cd "c:\Users\user\Downloads\Streaming App\src"
-   ```
-3. Compile os arquivos Java:
-   ```bash
-   javac *.java
-   ```
-4. Inicie o servidor:
-   ```bash
-   java Server
-   ```
-5. O servidor estará rodando na porta **8080**.
+If you want to build an _über-jar_, execute the following command:
 
-### 2. Inicializar o Front-end
+```shell script
+./mvnw package -Dquarkus.package.jar.type=uber-jar
+```
 
-1. Certifique-se de ter o **Node.js** instalado.
-2. Navegue até o diretório do front-end:
-   ```bash
-   cd "c:\Users\user\Downloads\Streaming App\frontend"
-   ```
-3. Instale as dependências:
-   ```bash
-   npm install
-   ```
-4. Inicie o servidor de desenvolvimento:
-   ```bash
-   npm run dev
-   ```
-5. O front-end estará disponível em **http://localhost:5173**.
+The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
 
-### 3. Executar a Aplicação Completa
+## Creating a native executable
 
-- Certifique-se de que o back-end está rodando na porta **8080**.
-- Certifique-se de que o front-end está rodando em **http://localhost:5173**.
-- A aplicação estará funcional e exibirá os dados do catálogo de filmes e séries.
+You can create a native executable using:
 
-## Estrutura do Projeto
+```shell script
+./mvnw package -Dnative
+```
 
-### Front-end
+Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
 
-- `src/components`: Componentes React (Hero, Navbar, Row).
-- `src/services`: Serviços para requisições HTTP.
-- `src/types.ts`: Tipos TypeScript para o catálogo.
+```shell script
+./mvnw package -Dnative -Dquarkus.native.container-build=true
+```
 
-### Back-end
+You can then execute your native executable with: `./target/streaming-api-1.0.0-SNAPSHOT-runner`
 
-- `src/Server.java`: Servidor principal.
-- `src/PlataformaStreaming.java`: Lógica de negócios para filmes e séries.
-- `src/Filme.java` e `src/Serie.java`: Modelos de dados.
+If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
 
-## Observações
+## Provided Code
 
-- Certifique-se de que as portas **8080** (back-end) e **5173** (front-end) estão disponíveis.
-- Caso encontre problemas, verifique se as dependências estão instaladas corretamente.
+### REST
+
+Easily start your REST Web Services
+
+[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)

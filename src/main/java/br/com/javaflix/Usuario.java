@@ -1,3 +1,4 @@
+package br.com.javaflix;
 public class Usuario {
     private String nome;
     private int idade;

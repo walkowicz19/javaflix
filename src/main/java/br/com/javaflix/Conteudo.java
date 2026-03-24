@@ -1,3 +1,4 @@
+package br.com.javaflix;
 public abstract class Conteudo {
     // Atributos (R2)
     private String titulo;

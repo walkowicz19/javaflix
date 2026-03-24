@@ -1,3 +1,4 @@
+package br.com.javaflix;
 
 public interface Avaliavel {
 
@@ -5,3 +6,4 @@ public interface Avaliavel {
 
     double getMediaAvaliacoes();
 }
+

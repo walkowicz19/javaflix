@@ -1,3 +1,4 @@
+package br.com.javaflix;
 public class Filme extends Conteudo {
 
     private int duracaoMinutos;

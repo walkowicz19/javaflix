@@ -1,17 +1,31 @@
+package br.com.javaflix;
+
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.annotation.PostConstruct;
 
+@ApplicationScoped
 public class PlataformaStreaming {
     private String nome;
     private List<Conteudo> catalogo;
 
-    public PlataformaStreaming(String nome) {
-        if (nome == null || nome.trim().isEmpty()) {
-            throw new IllegalArgumentException("Nome da plataforma não pode ser vazio");
-        }
-        this.nome = nome;
+    public PlataformaStreaming() {
+        this.nome = "JavaFlix";
         this.catalogo = new ArrayList<>();
     }
+
+    @PostConstruct
+    void inicializarMock() {
+        adicionarConteudo(new Filme("O Poderoso Chefão", "Drama", 16, 175, "Coppola"));
+        adicionarConteudo(new Filme("Shrek", "Animação", 0, 90, "Andrew Adamson"));
+        adicionarConteudo(new Filme("Matrix", "Ficção", 14, 136, "Wachowski"));
+        adicionarConteudo(new Serie("Breaking Bad", "Drama", 18, 5, 13, 50));
+        adicionarConteudo(new Serie("Stranger Things", "Ficção", 14, 4, 8, 60));
+        adicionarConteudo(new Serie("La Casa de Papel", "Ação", 16, 5, 10, 50));
+        adicionarConteudo(new Serie("Dark", "Ficção", 16, 3, 8, 60));
+    }
+
 
     public void adicionarConteudo(Conteudo conteudo) {
         if (conteudo == null) {
