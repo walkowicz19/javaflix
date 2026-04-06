@@ -8,7 +8,7 @@ Write-Host ""
 
 # Mapeamento de trailers PT-BR
 $trailers = @{
-    "O Poderoso Chefao" = "https://www.youtube.com/watch?v=UaVTIH8mujA"
+    "O Poderoso Chefao" = "https://www.youtube.com/watch?v=sY1S34973zA"
     "Shrek" = "https://www.youtube.com/watch?v=CwXOrWvPBPk"
     "Matrix" = "https://www.youtube.com/watch?v=m8e-FF8MsqU"
     "Inception" = "https://www.youtube.com/watch?v=8hP9D6kZseM"
