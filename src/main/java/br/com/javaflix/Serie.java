@@ -12,6 +12,19 @@ public class Serie extends Conteudo {
         this.minutosPorEpisodio = minPorEp;
     }
 
+    // Getters para serialização JSON
+    public int getTemporadas() {
+        return temporadas;
+    }
+
+    public int getEpisodiosPorTemporada() {
+        return episodiosPorTemporada;
+    }
+
+    public int getMinutosPorEpisodio() {
+        return minutosPorEpisodio;
+    }
+
     // Polimorfismo (R6): Série calcula duração multiplicando episódios
     @Override
     public int getDuracaoTotalEmMinutos() {

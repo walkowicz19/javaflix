@@ -10,6 +10,15 @@ public class Filme extends Conteudo {
         this.diretor = diretor;
     }
 
+    // Getters para serialização JSON
+    public int getDuracaoMinutos() {
+        return duracaoMinutos;
+    }
+
+    public String getDiretor() {
+        return diretor;
+    }
+
     // Polimorfismo (R6): Implementação específica para Filme
     @Override
     public int getDuracaoTotalEmMinutos() {

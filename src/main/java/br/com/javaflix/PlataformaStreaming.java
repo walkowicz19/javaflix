@@ -20,6 +20,7 @@ public class PlataformaStreaming {
         adicionarConteudo(new Filme("O Poderoso Chefão", "Drama", 16, 175, "Coppola"));
         adicionarConteudo(new Filme("Shrek", "Animação", 0, 90, "Andrew Adamson"));
         adicionarConteudo(new Filme("Matrix", "Ficção", 14, 136, "Wachowski"));
+        adicionarConteudo(new Filme("Inception", "Ficção", 14, 148, "Christopher Nolan"));
         adicionarConteudo(new Serie("Breaking Bad", "Drama", 18, 5, 13, 50));
         adicionarConteudo(new Serie("Stranger Things", "Ficção", 14, 4, 8, 60));
         adicionarConteudo(new Serie("La Casa de Papel", "Ação", 16, 5, 10, 50));

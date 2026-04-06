@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { Conteudo } from '../types';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = 'http://localhost:8081/api';
 
 export const api = axios.create({
     baseURL: API_URL,

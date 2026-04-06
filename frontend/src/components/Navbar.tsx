@@ -7,6 +7,7 @@ export const Navbar: React.FC<{
   onUser: () => void;
 }> = ({ onSearch, onNotifications, onUser }) => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [currentProfile, setCurrentProfile] = useState<any>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -14,6 +15,14 @@ export const Navbar: React.FC<{
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    // Load current profile from localStorage
+    const profile = localStorage.getItem('selectedProfile');
+    if (profile) {
+      setCurrentProfile(JSON.parse(profile));
+    }
   }, []);
 
   // Scroll to section by id
@@ -82,12 +91,20 @@ export const Navbar: React.FC<{
             onClick={onNotifications}
           />
           <div
-            className="flex items-center gap-2 cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer group"
             onClick={onUser}
           >
-            <div className="w-8 h-8 rounded bg-yellow-500 flex items-center justify-center text-black font-bold">
-              U
-            </div>
+            {currentProfile?.avatar ? (
+              <img
+                src={currentProfile.avatar}
+                alt={currentProfile.name}
+                className="w-8 h-8 rounded object-cover ring-2 ring-transparent group-hover:ring-white transition-all"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded bg-netflix-primary flex items-center justify-center text-white font-bold group-hover:bg-red-700 transition-colors">
+                {currentProfile?.name?.[0]?.toUpperCase() || 'U'}
+              </div>
+            )}
           </div>
         </div>
       </div>
