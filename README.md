@@ -454,15 +454,15 @@ docker run -p 8080:8080 javaflix-backend
 
 Este projeto é um trabalho acadêmico desenvolvido para fins educacionais.
 
-**Universidade:** [Nome da Universidade]  
-**Curso:** Engenharia de Software / Ciência da Computação  
-**Disciplina:** Programação Orientada a Objetos / Sistemas Distribuídos
+**Universidade:** Unieuro  
+**Curso:** Sistemas de Informação  
+**Disciplina:** PROJETO INTEGRADOR DE COMPUTAÇÃO PARALELA
 
 ---
 
 ## 👥 Equipe
 
-Desenvolvido com ❤️ pela equipe JavaFlix
+Matheus Nery, Marcelo Vaz, Gabriel
 
 ---
 
