@@ -188,10 +188,10 @@ graph TB
 - **Maven 3.8+** (incluído via wrapper)
 - **PocketBase** ([Download](https://pocketbase.io/docs/))
 
-### 1. Clonar o Repositório
+### 1. Baixar o Projeto
 
 ```bash
-git clone https://github.com/seu-usuario/javaflix.git
+# Clone ou baixe o projeto
 cd javaflix
 ```
 
@@ -435,26 +435,6 @@ docker run -p 8080:8080 javaflix-backend
 
 ---
 
-## 🤝 Contribuindo
-
-Este é um projeto acadêmico, mas contribuições são bem-vindas!
-
-### Como Contribuir
-
-1. Fork o projeto
-2. Crie uma branch (`git checkout -b feature/nova-funcionalidade`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/nova-funcionalidade`)
-5. Abra um Pull Request
-
-### Padrões de Código
-
-- **Java:** Seguir convenções do Google Java Style Guide
-- **TypeScript:** Seguir Airbnb Style Guide
-- **Commits:** Usar Conventional Commits
-
----
-
 ## 📊 Métricas do Projeto
 
 | Métrica | Valor |
@@ -498,11 +478,7 @@ Desenvolvido com ❤️ pela equipe JavaFlix
 
 ## 📞 Suporte
 
-Para dúvidas ou problemas:
-
-1. Consulte a [documentação](docs/)
-2. Verifique as [issues abertas](https://github.com/seu-usuario/javaflix/issues)
-3. Abra uma nova issue se necessário
+Para dúvidas ou problemas, consulte a [documentação](docs/) completa do projeto.
 
 ---
 
