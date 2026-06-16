@@ -13,6 +13,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
+import io.quarkus.cache.CacheResult;
+import io.quarkus.cache.CacheInvalidateAll;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -51,6 +53,7 @@ public class ConteudoService {
      *
      * @return Lista de conteúdos
      */
+    @CacheResult(cacheName = "conteudo-cache")
     public List<Conteudo> listarTodos() {
         long inicio = System.currentTimeMillis();
         LOG.info("Listando todos os conteúdos do PocketBase");
@@ -91,12 +94,16 @@ public class ConteudoService {
      * @return Conteúdo encontrado
      */
     public Conteudo buscarPorTitulo(String titulo) {
-        long inicio = System.currentTimeMillis();
-        LOG.infof("Buscando conteúdo por título: %s", titulo);
-
         if (titulo == null || titulo.trim().isEmpty()) {
             throw new IllegalArgumentException("Título não pode ser vazio");
         }
+        return buscarPorTituloCached(titulo);
+    }
+
+    @CacheResult(cacheName = "conteudo-buscar-cache")
+    Conteudo buscarPorTituloCached(String titulo) {
+        long inicio = System.currentTimeMillis();
+        LOG.infof("Buscando conteúdo por título: %s", titulo);
 
         try {
             String filter = String.format("titulo~'%s'", titulo.trim());
@@ -104,17 +111,13 @@ public class ConteudoService {
 
             if (response.items.isEmpty()) {
                 LOG.warnf("Conteúdo não encontrado: %s", titulo);
-                throw new RuntimeException(new ConteudoNaoEncontradoException("Conteúdo não encontrado: " + titulo));
+                throw new ConteudoNaoEncontradoException("Conteúdo não encontrado: " + titulo);
             }
 
             LOG.infof("Conteúdo encontrado: %s", response.items.get(0).titulo);
             return mapToConteudo(response.items.get(0));
-        } catch (RuntimeException e) {
-            if (e.getCause() instanceof ConteudoNaoEncontradoException) {
-                throw e;
-            }
-            LOG.error("Erro ao buscar conteúdo por título", e);
-            throw new RuntimeException("Erro ao buscar conteúdo", e);
+        } catch (ConteudoNaoEncontradoException e) {
+            throw e;
         } catch (Exception e) {
             LOG.error("Erro ao buscar conteúdo por título", e);
             throw new RuntimeException("Erro ao buscar conteúdo", e);
@@ -130,12 +133,16 @@ public class ConteudoService {
      * @return Lista de conteúdos do gênero
      */
     public List<Conteudo> filtrarPorGenero(String genero) {
-        long inicio = System.currentTimeMillis();
-        LOG.infof("Filtrando conteúdos por gênero: %s", genero);
-
         if (genero == null || genero.trim().isEmpty()) {
             return listarTodos();
         }
+        return filtrarPorGeneroCached(genero);
+    }
+
+    @CacheResult(cacheName = "conteudo-filtrar-cache")
+    List<Conteudo> filtrarPorGeneroCached(String genero) {
+        long inicio = System.currentTimeMillis();
+        LOG.infof("Filtrando conteúdos por gênero: %s", genero);
 
         try {
             String filter = String.format("genero~'%s'", genero.trim());
@@ -186,6 +193,9 @@ public class ConteudoService {
      * @param conteudo Conteúdo a ser criado
      * @return Conteúdo criado com ID
      */
+    @CacheInvalidateAll(cacheName = "conteudo-cache")
+    @CacheInvalidateAll(cacheName = "conteudo-buscar-cache")
+    @CacheInvalidateAll(cacheName = "conteudo-filtrar-cache")
     public Conteudo criar(Conteudo conteudo) {
         long inicio = System.currentTimeMillis();
         LOG.infof("Criando novo conteúdo: %s", conteudo.getTitulo());
@@ -211,6 +221,9 @@ public class ConteudoService {
      * @param conteudo Dados atualizados
      * @return Conteúdo atualizado
      */
+    @CacheInvalidateAll(cacheName = "conteudo-cache")
+    @CacheInvalidateAll(cacheName = "conteudo-buscar-cache")
+    @CacheInvalidateAll(cacheName = "conteudo-filtrar-cache")
     public Conteudo atualizar(String id, Conteudo conteudo) {
         long inicio = System.currentTimeMillis();
         LOG.infof("Atualizando conteúdo ID: %s", id);
@@ -234,6 +247,9 @@ public class ConteudoService {
      *
      * @param id ID do conteúdo
      */
+    @CacheInvalidateAll(cacheName = "conteudo-cache")
+    @CacheInvalidateAll(cacheName = "conteudo-buscar-cache")
+    @CacheInvalidateAll(cacheName = "conteudo-filtrar-cache")
     public void remover(String id) {
         long inicio = System.currentTimeMillis();
         LOG.infof("Removendo conteúdo ID: %s", id);
@@ -307,10 +323,10 @@ public class ConteudoService {
                 record.diretor != null ? record.diretor : "Desconhecido"
             );
 
-            // TODO: Restaurar avaliações quando método avaliar() for implementado
-            // if (record.avaliacoes != null) {
-            //     record.avaliacoes.forEach(filme::avaliar);
-            // }
+            // Restaurar avaliações agora que método avaliar() está implementado
+            if (record.avaliacoes != null) {
+                record.avaliacoes.forEach(filme::avaliar);
+            }
 
             return filme;
         } else {
@@ -323,10 +339,10 @@ public class ConteudoService {
                 record.duracaoMediaEpisodio != null ? record.duracaoMediaEpisodio : 45
             );
 
-            // TODO: Restaurar avaliações quando método avaliar() for implementado
-            // if (record.avaliacoes != null) {
-            //     record.avaliacoes.forEach(serie::avaliar);
-            // }
+            // Restaurar avaliações agora que método avaliar() está implementado
+            if (record.avaliacoes != null) {
+                record.avaliacoes.forEach(serie::avaliar);
+            }
 
             return serie;
         }
@@ -337,25 +353,23 @@ public class ConteudoService {
      */
     private ConteudoRequest mapToRequest(Conteudo conteudo) {
         ConteudoRequest request = new ConteudoRequest();
-        // TODO: Implementar getters nas classes Conteudo, Filme e Serie
-        // request.titulo = conteudo.getTitulo();
-        // request.genero = conteudo.getGenero();
-        // request.classificacaoEtaria = conteudo.getClassificacaoEtaria();
-        // request.mediaAvaliacoes = conteudo.obterMediaAvaliacoes();
+        request.titulo = conteudo.getTitulo();
+        request.genero = conteudo.getGenero();
+        request.classificacaoEtaria = conteudo.getClassificacaoEtaria();
+        request.mediaAvaliacoes = conteudo.obterMediaAvaliacoes();
 
-        // Por enquanto, retorna request vazio
         request.tipo = conteudo instanceof Filme ? "filme" : "serie";
 
-        // if (conteudo instanceof Filme) {
-        //     Filme filme = (Filme) conteudo;
-        //     request.duracaoMinutos = filme.getDuracaoMinutos();
-        //     request.diretor = filme.getDiretor();
-        // } else if (conteudo instanceof Serie) {
-        //     Serie serie = (Serie) conteudo;
-        //     request.temporadas = serie.getTemporadas();
-        //     request.episodiosPorTemporada = serie.getEpisodiosPorTemporada();
-        //     request.duracaoMediaEpisodio = serie.getDuracaoMediaEpisodioMinutos();
-        // }
+        if (conteudo instanceof Filme) {
+            Filme filme = (Filme) conteudo;
+            request.duracaoMinutos = filme.getDuracaoMinutos();
+            request.diretor = filme.getDiretor();
+        } else if (conteudo instanceof Serie) {
+            Serie serie = (Serie) conteudo;
+            request.temporadas = serie.getTemporadas();
+            request.episodiosPorTemporada = serie.getEpisodiosPorTemporada();
+            request.duracaoMediaEpisodio = serie.getDuracaoMediaEpisodioMinutos();
+        }
 
         return request;
     }

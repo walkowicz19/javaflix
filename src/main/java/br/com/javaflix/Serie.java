@@ -25,6 +25,10 @@ public class Serie extends Conteudo {
         return minutosPorEpisodio;
     }
 
+    public int getDuracaoMediaEpisodioMinutos() {
+        return minutosPorEpisodio;
+    }
+
     // Polimorfismo (R6): Série calcula duração multiplicando episódios
     @Override
     public int getDuracaoTotalEmMinutos() {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Info, Search, Bell, X } from 'lucide-react';
+import { Search, Bell, X } from 'lucide-react';
 import { Navbar } from "./components/Navbar";
 import { Hero } from "./components/Hero";
 import { Row } from "./components/Row";

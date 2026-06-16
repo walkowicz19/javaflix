@@ -5,10 +5,18 @@ import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.annotation.PostConstruct;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import java.util.concurrent.ExecutorService;
+
 @ApplicationScoped
 public class PlataformaStreaming {
     private String nome;
     private List<Conteudo> catalogo;
+
+    @Inject
+    @Named("javaflixExecutor")
+    ExecutorService executorService;
 
     public PlataformaStreaming() {
         this.nome = "JavaFlix";
@@ -106,7 +114,7 @@ public class PlataformaStreaming {
                 recomendacoes.add(catalogo.get(catalogo.size() - 1));
             }
             return recomendacoes;
-        });
+        }, executorService);
     }
 
     // 2. Mock de Transcodificação de Vídeo (CPU Bound)
@@ -117,7 +125,7 @@ public class PlataformaStreaming {
                 Thread.sleep(3000); // Simula carga intensa de CPU
             } catch (InterruptedException e) { }
             System.out.println("[Transcoder] Concluído: " + filme.getTitulo());
-        });
+        }, executorService);
     }
 
     // 3. Mock de Envio de Notificações Distribuído (Push)
@@ -128,7 +136,7 @@ public class PlataformaStreaming {
                 Thread.sleep(500);
             } catch (InterruptedException e) {}
             System.out.println("[Notificacao-Worker-1] E-mail e Push enviado para todos os assinantes: " + mensagem);
-        });
+        }, executorService);
     }
 
 }

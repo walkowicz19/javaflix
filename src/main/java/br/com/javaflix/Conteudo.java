@@ -1,9 +1,14 @@
 package br.com.javaflix;
-public abstract class Conteudo {
+
+import java.util.ArrayList;
+import java.util.List;
+
+public abstract class Conteudo implements Avaliavel {
     // Atributos (R2)
     private String titulo;
     private String genero;
     private int classificacaoEtaria; // Ex: 10, 12, 16, 18 anos
+    private List<Double> avaliacoes = new ArrayList<>();
 
     public Conteudo(String titulo, String genero, int classificacaoEtaria) {
         if (titulo == null || titulo.trim().isEmpty()) {
@@ -40,5 +45,26 @@ public abstract class Conteudo {
     
     public String getTipo() { 
         return this.getClass().getSimpleName().equals("Filme") ? "Filme" : "Serie"; 
+    }
+
+    @Override
+    public void avaliar(double nota) {
+        this.avaliacoes.add(nota);
+    }
+
+    @Override
+    public double getMediaAvaliacoes() {
+        if (avaliacoes.isEmpty()) {
+            return 0.0;
+        }
+        double soma = 0;
+        for (double d : avaliacoes) {
+            soma += d;
+        }
+        return soma / avaliacoes.size();
+    }
+
+    public double obterMediaAvaliacoes() {
+        return getMediaAvaliacoes();
     }
 }
