@@ -7,6 +7,7 @@ import br.com.javaflix.Serie;
 import br.com.javaflix.client.PocketBaseClient;
 import br.com.javaflix.client.dto.ConteudoRecord;
 import br.com.javaflix.client.dto.ConteudoRequest;
+import br.com.javaflix.config.ThreadPoolConfig;
 import br.com.javaflix.metrics.PerformanceMetrics;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -19,6 +20,7 @@ import io.quarkus.cache.CacheInvalidateAll;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 /**
@@ -41,11 +43,27 @@ public class ConteudoService {
     @Inject
     PerformanceMetrics performanceMetrics;
 
+    @Inject
+    ThreadPoolConfig threadPoolConfig;
+
     /**
-     * Retorna estatísticas básicas do pool de threads.
+     * Retorna estatísticas ricas do ThreadPoolExecutor: active threads, pool size,
+     * queue depth e tasks completadas. Visível nos logs de diagnóstico.
      */
     public String getPoolStats() {
-        return String.format("Executor em uso: %s", executorService.getClass().getSimpleName());
+        ThreadPoolExecutor tpe = threadPoolConfig.getThreadPoolExecutor();
+        if (tpe == null) {
+            return "Executor ainda não inicializado";
+        }
+        return String.format(
+            "Pool[active=%d, pool=%d/%d, queue=%d/%d, completed=%d]",
+            tpe.getActiveCount(),
+            tpe.getPoolSize(),
+            tpe.getMaximumPoolSize(),
+            tpe.getQueue().size(),
+            tpe.getQueue().size() + tpe.getQueue().remainingCapacity(),
+            tpe.getCompletedTaskCount()
+        );
     }
 
     /**

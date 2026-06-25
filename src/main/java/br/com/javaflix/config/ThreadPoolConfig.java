@@ -8,10 +8,23 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Configuração centralizada do pool de threads utilizado nas operações assíncronas.
+ *
+ * Usa ThreadPoolExecutor explícito para que core-size, max-size e queue-capacity
+ * sejam todos honrados — ao contrário de Executors.newFixedThreadPool que ignora
+ * max-size e queue-capacity.
+ *
+ * Comportamento:
+ *   - Até corePoolSize threads ficam ativas permanentemente.
+ *   - Quando a fila (queueCapacity) enche, novas threads são criadas até maxPoolSize.
+ *   - Threads acima do core ficam ociosas por 60 s antes de serem encerradas.
+ *   - Se pool + fila estiverem cheios, a task é executada na thread do chamador
+ *     (CallerRunsPolicy) em vez de ser rejeitada.
  */
 @ApplicationScoped
 public class ThreadPoolConfig {
@@ -27,7 +40,7 @@ public class ThreadPoolConfig {
     @ConfigProperty(name = "javaflix.threadpool.queue-capacity", defaultValue = "100")
     int queueCapacity;
 
-    private ExecutorService executorService;
+    private ThreadPoolExecutor executorService;
 
     @Produces
     @Named("javaflixExecutor")
@@ -35,21 +48,56 @@ public class ThreadPoolConfig {
     public ExecutorService createExecutorService() {
         if (executorService == null || executorService.isShutdown()) {
             LOG.infof(
-                "Criando executor do JavaFlix com core-size=%d, max-size=%d, queue-capacity=%d",
+                "Criando ThreadPoolExecutor JavaFlix — core=%d, max=%d, queue=%d",
+                corePoolSize, maxPoolSize, queueCapacity
+            );
+            executorService = new ThreadPoolExecutor(
                 corePoolSize,
                 maxPoolSize,
-                queueCapacity
+                60L, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(queueCapacity),
+                r -> {
+                    Thread t = new Thread(r, "javaflix-worker-" + System.nanoTime());
+                    t.setDaemon(true);
+                    return t;
+                },
+                new ThreadPoolExecutor.CallerRunsPolicy()
             );
-            executorService = Executors.newFixedThreadPool(corePoolSize);
+            // Mantém threads de core vivas mesmo ociosas
+            executorService.allowCoreThreadTimeOut(false);
+            LOG.infof(
+                "ThreadPoolExecutor iniciado — threads ativas: %d / max: %d",
+                executorService.getActiveCount(), executorService.getMaximumPoolSize()
+            );
         }
+        return executorService;
+    }
+
+    /**
+     * Expõe o executor concreto para logging rico de diagnóstico.
+     */
+    public ThreadPoolExecutor getThreadPoolExecutor() {
         return executorService;
     }
 
     @PreDestroy
     void shutdownExecutorService() {
         if (executorService != null && !executorService.isShutdown()) {
-            LOG.info("Encerrando executor do JavaFlix");
+            LOG.infof(
+                "Encerrando executor JavaFlix — tasks completadas: %d, na fila: %d",
+                executorService.getCompletedTaskCount(),
+                executorService.getQueue().size()
+            );
             executorService.shutdown();
+            try {
+                if (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
+                    executorService.shutdownNow();
+                    LOG.warn("Executor forçado a encerrar após timeout de 10 s");
+                }
+            } catch (InterruptedException e) {
+                executorService.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }

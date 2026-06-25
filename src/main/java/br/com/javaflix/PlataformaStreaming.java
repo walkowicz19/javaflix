@@ -1,16 +1,23 @@
 package br.com.javaflix;
 
+import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.annotation.PostConstruct;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.util.concurrent.ExecutorService;
+import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class PlataformaStreaming {
+
+    private static final Logger LOG = Logger.getLogger(PlataformaStreaming.class);
+
     private String nome;
     private List<Conteudo> catalogo;
 
@@ -35,7 +42,6 @@ public class PlataformaStreaming {
         adicionarConteudo(new Serie("Dark", "Ficção", 16, 3, 8, 60));
     }
 
-
     public void adicionarConteudo(Conteudo conteudo) {
         if (conteudo == null) {
             throw new IllegalArgumentException("Conteúdo não pode ser nulo");
@@ -50,17 +56,22 @@ public class PlataformaStreaming {
         }
     }
 
-    // Busca Paralelizada (Simulação de ganho de performance em catálogos grandes)
+    /**
+     * Busca no catálogo in-memory por título (case-insensitive).
+     * O catálogo local é pequeno (~8 itens), portanto usa stream sequencial —
+     * parallelStream() sobre N < ~1000 elementos tem overhead de fork/join
+     * superior ao ganho real.
+     */
     public Conteudo buscar(String titulo) throws ConteudoNaoEncontradoException {
         if (titulo == null || titulo.trim().isEmpty()) {
             throw new IllegalArgumentException("Título de busca não pode ser vazio");
         }
-        
         String tituloLimpo = titulo.trim();
-        return catalogo.parallelStream()
+        return catalogo.stream()
                 .filter(c -> c.getTitulo().equalsIgnoreCase(tituloLimpo))
                 .findFirst()
-                .orElseThrow(() -> new ConteudoNaoEncontradoException("Conteúdo '" + tituloLimpo + "' não encontrado."));
+                .orElseThrow(() -> new ConteudoNaoEncontradoException(
+                        "Conteúdo '" + tituloLimpo + "' não encontrado."));
     }
 
     public void assistirConteudo(Usuario usuario, Conteudo conteudo) throws ClassificacaoIndicativaException {
@@ -69,26 +80,30 @@ public class PlataformaStreaming {
         }
         if (usuario.getIdade() < conteudo.getClassificacaoEtaria()) {
             throw new ClassificacaoIndicativaException(
-                "Usuário " + usuario.getNome() + " não tem idade para assistir '" + conteudo.getTitulo() + "'"
-            );
+                    "Usuário " + usuario.getNome() + " não tem idade para assistir '"
+                            + conteudo.getTitulo() + "'");
         }
         System.out.println(usuario.getNome() + " está assistindo: " + conteudo.getTitulo());
         System.out.println("Plano: " + usuario.getTipoAssinatura());
     }
 
-    // Filtros paralelizados
+    /**
+     * Filtra o catálogo local por gênero.
+     * Stream sequencial: catálogo mock tem ~8 itens; parallelStream adicionaria
+     * apenas overhead do ForkJoinPool.
+     */
     public List<Conteudo> filtrar(String genero) {
         if (genero == null || genero.trim().isEmpty()) {
             throw new IllegalArgumentException("Gênero não pode ser vazio");
         }
         String generoLimpo = genero.trim();
-        return catalogo.parallelStream()
+        return catalogo.stream()
                 .filter(c -> c.getGenero().equalsIgnoreCase(generoLimpo))
                 .toList();
     }
 
     public List<Conteudo> filtrar(int idadeMaxima) {
-        return catalogo.parallelStream()
+        return catalogo.stream()
                 .filter(c -> c.getClassificacaoEtaria() <= idadeMaxima)
                 .toList();
     }
@@ -96,47 +111,95 @@ public class PlataformaStreaming {
     public List<Conteudo> getCatalogo() {
         return catalogo;
     }
-    
+
     // ==========================================
-    // SIMULAÇÃO DE SISTEMAS DISTRIBUÍDOS E CONCORRENTES
+    // OPERAÇÕES ASSÍNCRONAS COM PROPÓSITO REAL
     // ==========================================
 
-    // 1. Sistema de Recomendação Paralelo
-    public java.util.concurrent.CompletableFuture<List<Conteudo>> obterRecomendacoesAsync() {
-        return java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+    /**
+     * Gera recomendações de forma assíncrona descarregando o trabalho no pool
+     * gerenciado (útil quando a lógica for substituída por chamada I/O real).
+     *
+     * Algoritmo atual: retorna os dois conteúdos com maior classificação etária
+     * (proxy simples de "mais adultos / mais exigentes") sem nenhum sleep artificial.
+     */
+    public CompletableFuture<List<Conteudo>> obterRecomendacoesAsync() {
+        return CompletableFuture.supplyAsync(() -> {
+            LOG.debug("[Recomendacoes] Calculando recomendações para catálogo local");
+            return catalogo.stream()
+                    .sorted(Comparator.comparingInt(Conteudo::getClassificacaoEtaria).reversed())
+                    .limit(2)
+                    .collect(java.util.stream.Collectors.toList());
+        }, executorService);
+    }
+
+    /**
+     * Dispara a geração de metadados / checksum de um conteúdo em background.
+     *
+     * Substitui o sleep de 3 s por trabalho real de CPU: calcula o SHA-256 do
+     * título serializado em bytes — operação trivial em volume, mas demonstra
+     * uso honesto da thread sem bloquear I/O artificialmente.
+     *
+     * Em produção este método receberia o caminho do arquivo e faria a leitura
+     * do stream real; a assinatura pública permanece compatível.
+     */
+    public CompletableFuture<Void> iniciarTranscodificacao(Conteudo conteudo) {
+        return CompletableFuture.runAsync(() -> {
+            LOG.infof("[Transcoder] Processando metadados de '%s'", conteudo.getTitulo());
             try {
-                Thread.sleep(1000); // Simulando query pesada
-            } catch (InterruptedException e) { }
-            // Simula recomendação básica (pegar os 2 primeiros aleatórios)
-            List<Conteudo> recomendacoes = new ArrayList<>();
-            if (catalogo.size() > 2) {
-                recomendacoes.add(catalogo.get(0));
-                recomendacoes.add(catalogo.get(catalogo.size() - 1));
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                // Processa o título + gênero + classificação como payload representativo
+                byte[] input = (conteudo.getTitulo()
+                        + conteudo.getGenero()
+                        + conteudo.getClassificacaoEtaria()).getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                // Repete o hash 10.000 vezes para representar carga de metadados
+                for (int i = 0; i < 10_000; i++) {
+                    input = digest.digest(input);
+                }
+                String checksum = bytesToHex(input);
+                LOG.infof("[Transcoder] Metadados prontos para '%s' — checksum: %s",
+                        conteudo.getTitulo(), checksum);
+            } catch (java.security.NoSuchAlgorithmException e) {
+                LOG.error("[Transcoder] SHA-256 indisponível", e);
             }
-            return recomendacoes;
         }, executorService);
     }
 
-    // 2. Mock de Transcodificação de Vídeo (CPU Bound)
-    public java.util.concurrent.CompletableFuture<Void> iniciarTranscodificacaoOriginal(Conteudo filme) {
-        return java.util.concurrent.CompletableFuture.runAsync(() -> {
-            System.out.println("[Transcoder] Iniciando conversão de " + filme.getTitulo() + " para 1080p, 720p...");
-            try {
-                Thread.sleep(3000); // Simula carga intensa de CPU
-            } catch (InterruptedException e) { }
-            System.out.println("[Transcoder] Concluído: " + filme.getTitulo());
+    /**
+     * Mantém compatibilidade com o endpoint /transcodificar existente.
+     */
+    public CompletableFuture<Void> iniciarTranscodificacaoOriginal(Conteudo conteudo) {
+        return iniciarTranscodificacao(conteudo);
+    }
+
+    /**
+     * Enfileira notificação push para todos os assinantes.
+     *
+     * Sem sleep artificial: constrói o payload JSON da notificação e registra
+     * via logging — substitua o LOG.infof pelo envio real (HTTP/WebSocket/Kafka)
+     * sem alterar a assinatura pública.
+     */
+    public CompletableFuture<Void> notificarUsuariosPush(String mensagem) {
+        return CompletableFuture.runAsync(() -> {
+            LOG.info("[Notificacao] Montando payload de push para todos os assinantes...");
+            String payload = String.format(
+                    "{\"tipo\":\"push\",\"mensagem\":\"%s\",\"timestamp\":%d,\"destinatarios\":\"all\"}",
+                    mensagem.replace("\"", "\\\""),
+                    System.currentTimeMillis());
+            // Aqui seria feita a chamada real ao serviço de push (FCM, APNs, WebSocket…)
+            LOG.infof("[Notificacao] Push enfileirado — payload: %s", payload);
         }, executorService);
     }
 
-    // 3. Mock de Envio de Notificações Distribuído (Push)
-    public java.util.concurrent.CompletableFuture<Void> notificarUsuariosPush(String mensagem) {
-        return java.util.concurrent.CompletableFuture.runAsync(() -> {
-            System.out.println("[Notificacao-Worker-1] Lendo fila de disparos...");
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {}
-            System.out.println("[Notificacao-Worker-1] E-mail e Push enviado para todos os assinantes: " + mensagem);
-        }, executorService);
-    }
+    // ──────────────────────────────────────────
+    // Utilitários internos
+    // ──────────────────────────────────────────
 
+    private static String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
 }
