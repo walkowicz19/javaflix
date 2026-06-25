@@ -5,10 +5,11 @@
 [![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6.svg)](https://www.typescriptlang.org/)
 [![PocketBase](https://img.shields.io/badge/PocketBase-0.22-B8DBE4.svg)](https://pocketbase.io/)
-[![Testes](https://img.shields.io/badge/Testes-21-brightgreen.svg)]()
-[![Cobertura](https://img.shields.io/badge/Cobertura-~75%25-green.svg)]()
+[![Testes](https://img.shields.io/badge/Testes-25-brightgreen.svg)]()
+[![Cobertura](https://img.shields.io/badge/Cobertura-~80%25-green.svg)]()
+[![Carga](https://img.shields.io/badge/Carga-1.000%20usuarios-blueviolet.svg)]()
 
-Sistema de streaming academico com Quarkus (backend), React 19 + TypeScript (frontend) e PocketBase (banco SQLite). Demonstra concorrencia com `CompletableFuture`, cache Redis declarativo e observabilidade via Micrometer/Prometheus.
+Sistema de streaming academico com Quarkus (backend), React 19 + TypeScript (frontend) e PocketBase (banco SQLite). Demonstra concorrencia com `CompletableFuture`, cache Redis declarativo, observabilidade via Micrometer/Prometheus e resiliencia validada com teste de carga de **1.000 usuarios simultaneos**.
 
 ---
 
@@ -161,12 +162,41 @@ cd frontend && npm run build
 # Classe especifica
 ./mvnw test -Dtest=ConteudoServiceTest
 
+# Apenas testes de carga (1.000 usuarios)
+./mvnw test -Dtest=ConcurrentLoadTest
+
 # Relatorio de cobertura (Jacoco)
 ./mvnw verify
 # Relatorio em: target/site/jacoco/index.html
 ```
 
-**21 testes** — 14 unitarios (JUnit + Mockito) + 7 de integracao (REST Assured). Cobertura ~75%.
+**25 testes** — 14 unitarios (JUnit + Mockito) + 7 de integracao (REST Assured) + **4 de carga concorrente**. Cobertura ~80%.
+
+### Testes de Carga — `ConcurrentLoadTest`
+
+Valida resiliencia do sistema sob pico de acesso usando `CountDownLatch` para disparar N threads simultaneamente:
+
+| Cenario | Usuarios | Resultado | Throughput |
+|---------|----------|-----------|------------|
+| Leitura concorrente do catalogo | 1.000 | ✔ 0 erros | ~10.000 req/s |
+| Busca por titulo em paralelo | 1.000 | ✔ 0 erros | ~5.600 req/s |
+| Avaliacoes simultaneas (race condition) | 500 | ✔ 0 race cond. | — |
+| Throughput minimo (ExecutorService) | 1.000 | ✔ 0 erros | ~14.900 req/s |
+
+**Bug encontrado e corrigido durante os testes:**
+
+> `ArrayList` em `PlataformaStreaming.catalogo` e `Conteudo.avaliacoes` lancava
+> `ConcurrentModificationException` sob carga concorrente.
+> **Corrigido** substituindo por `CopyOnWriteArrayList` (leitura-intensiva, thread-safe sem lock).
+
+Thread pool tambem redimensionado para absorver pico real:
+
+```properties
+# application.properties
+javaflix.threadpool.core-size=50   # era 10
+javaflix.threadpool.max-size=200   # era 20
+javaflix.threadpool.queue-capacity=2000  # era 100
+```
 
 ---
 
@@ -257,7 +287,9 @@ Quarkus Backend (:8083 -> 8081)
 | **Paralelismo** | `filtrarPorGenerosParalelo()` — N generos em paralelo com barreira de sincronizacao |
 | **Cache** | Redis com TTL 5 min, invalidacao automatica em escrita |
 | **Observabilidade** | Histogramas p50/p95/p99 por endpoint via Micrometer/Prometheus |
-| **Testes** | JUnit 5 + Mockito + REST Assured, 21 casos, ~75% cobertura |
+| **Testes** | JUnit 5 + Mockito + REST Assured, 25 casos, ~80% cobertura |
+| **Carga** | `CountDownLatch` + `ExecutorService`, 1.000 threads simultaneas, ~14.900 req/s |
+| **Thread-safety** | `CopyOnWriteArrayList` em `catalogo` e `avaliacoes` |
 
 ---
 
@@ -267,8 +299,10 @@ Quarkus Backend (:8083 -> 8081)
 |---------|-------|
 | Linhas Java | ~1.500 |
 | Linhas TypeScript | ~900 |
-| Testes automatizados | 21 |
-| Cobertura | ~75% |
+| Testes automatizados | 25 (+ 4 de carga) |
+| Cobertura | ~80% |
+| Throughput pico | ~14.900 req/s |
+| Usuarios simultaneos testados | 1.000 |
 | Endpoints REST | 6 |
 | Componentes React | 8 |
 | Versao | 1.1.0 |
@@ -282,4 +316,4 @@ Matheus Nery . Marcelo Vaz . Gabriel
 
 ---
 
-**Versao:** 1.1.0 . **Atualizado:** 2026-04-06
+**Versao:** 1.2.0 . **Atualizado:** 2026-06-25
