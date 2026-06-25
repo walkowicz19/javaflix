@@ -6,7 +6,7 @@ import { Hero } from "./components/Hero";
 import { Row } from "./components/Row";
 import { useCatalogo } from "./hooks/useCatalogo";
 import { useModal } from "./hooks/useModal";
-import type { Conteudo, Filme, Serie } from "./types";
+import type { Filme, Serie } from "./types";
 
 function App() {
   const navigate = useNavigate();
