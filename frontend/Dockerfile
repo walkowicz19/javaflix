@@ -1,5 +1,5 @@
-# Stage 1: Build
-FROM node:18-alpine AS build
+# Stage 1: Build — Node 22 LTS (mínimo exigido pelo Vite 7 e @types/node 24)
+FROM node:22-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci

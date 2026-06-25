@@ -1,507 +1,285 @@
-# JavaFlix - Plataforma de Streaming Completa
+﻿# JavaFlix — Plataforma de Streaming
 
-[![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://www.oracle.com/java/)
-[![Quarkus](https://img.shields.io/badge/Quarkus-3.x-blue.svg)](https://quarkus.io/)
-[![React](https://img.shields.io/badge/React-18-61DAFB.svg)](https://reactjs.org/)
+[![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://www.oracle.com/java/technologies/downloads/)
+[![Quarkus](https://img.shields.io/badge/Quarkus-3.32-blue.svg)](https://quarkus.io/)
+[![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6.svg)](https://www.typescriptlang.org/)
-[![PocketBase](https://img.shields.io/badge/PocketBase-0.22+-B8DBE4.svg)](https://pocketbase.io/)
+[![PocketBase](https://img.shields.io/badge/PocketBase-0.22-B8DBE4.svg)](https://pocketbase.io/)
+[![Testes](https://img.shields.io/badge/Testes-21-brightgreen.svg)]()
+[![Cobertura](https://img.shields.io/badge/Cobertura-~75%25-green.svg)]()
 
-Sistema completo de streaming de vídeos desenvolvido com Quarkus (backend), React + TypeScript (frontend) e PocketBase (banco de dados). Implementa conceitos avançados de programação concorrente, arquitetura REST e autenticação JWT.
-
----
-
-## 📋 Índice
-
-- [Visão Geral](#-visão-geral)
-- [Funcionalidades](#-funcionalidades)
-- [Tecnologias](#️-tecnologias)
-- [Arquitetura](#-arquitetura)
-- [Instalação](#-instalação)
-- [Execução](#-execução)
-- [Documentação](#-documentação)
-- [Testes](#-testes)
-- [API Endpoints](#-api-endpoints)
-- [Contribuindo](#-contribuindo)
-- [Licença](#-licença)
+Sistema de streaming academico com Quarkus (backend), React 19 + TypeScript (frontend) e PocketBase (banco SQLite). Demonstra concorrencia com `CompletableFuture`, cache Redis declarativo e observabilidade via Micrometer/Prometheus.
 
 ---
 
-## 🎯 Visão Geral
+## Inicio Rapido (Docker — metodo recomendado)
 
-JavaFlix é uma plataforma de streaming acadêmica que demonstra a implementação de:
-
-- **Programação Orientada a Objetos** com herança, polimorfismo e interfaces
-- **Concorrência e Paralelismo** usando `parallelStream()` e `CompletableFuture`
-- **Arquitetura REST** com Quarkus Framework
-- **Persistência de Dados** com PocketBase (SQLite)
-- **Autenticação JWT** para segurança
-- **Frontend Moderno** com React, TypeScript e Tailwind CSS
-- **Player de Vídeo** com suporte a múltiplos formatos
-
----
-
-## ✨ Funcionalidades
-
-### ✅ Implementadas
-
-#### Backend
-- ✅ **API REST completa** com 15+ endpoints
-- ✅ **Autenticação JWT** (login, registro, verificação)
-- ✅ **CRUD de conteúdos** (filmes e séries)
-- ✅ **Sistema de avaliações** com média calculada
-- ✅ **Busca e filtros** por título e gênero
-- ✅ **Processamento paralelo** com `parallelStream()`
-- ✅ **Operações assíncronas** com `CompletableFuture`
-- ✅ **Integração com PocketBase** via REST Client
-- ✅ **CORS configurado** para desenvolvimento
-- ✅ **Tratamento de erros** robusto
-
-#### Frontend
-- ✅ **Interface moderna** com Tailwind CSS estilo Netflix
-- ✅ **Sistema de perfis** com até 5 perfis por conta
-- ✅ **Player de vídeo** com controles completos e Netflix red
-- ✅ **Catálogo organizado** por categorias
-- ✅ **Busca em tempo real** com modal funcional
-- ✅ **Sistema de notificações** integrado
-- ✅ **Modal de preferências** com configurações de conta
-- ✅ **Navegação fluida** entre perfis e catálogo
-- ✅ **Design responsivo** para mobile e desktop
-- ✅ **Suporte a múltiplos formatos** (YouTube, Vimeo, MP4, WebM)
-
-#### Banco de Dados
-- ✅ **PocketBase configurado** com 3 collections
-- ✅ **4 conteúdos cadastrados** com trailers
-- ✅ **Admin UI** para gerenciamento
-- ✅ **REST API automática**
-- ✅ **Autenticação integrada**
-
-#### Testes
-- ✅ **21 testes automatizados** (14 unitários + 7 integração)
-- ✅ **~75% de cobertura** de código
-- ✅ **Testes de concorrência** validados
-- ✅ **Mocks e stubs** implementados
-
-### 🎉 Novidades v1.1.0 (2026-04-06)
-
-- ✅ **Sistema de perfis** completo com gerenciamento
-- ✅ **Modal de busca** funcional com filtros
-- ✅ **Modal de notificações** com alertas
-- ✅ **Modal de preferências** com planos e configurações
-- ✅ **VideoPlayer** com controles Netflix red
-- ✅ **Espaçamento corrigido** em todos os detalhes
-- ✅ **Navegação aprimorada** entre telas
-
-### 🔄 Em Desenvolvimento
-
-- 🔄 **Sistema de favoritos** e lista personalizada
-- 🔄 **Histórico de visualização** com progresso
-- 🔄 **Recomendações** baseadas em preferências
-- 🔄 **Benchmarks de performance** (JMH)
-- 🔄 **Métricas de monitoramento** (Micrometer)
-
----
-
-## 🛠️ Tecnologias
-
-### Backend
-| Tecnologia | Versão | Descrição |
-|------------|--------|-----------|
-| **Java** | 17+ | Linguagem principal |
-| **Quarkus** | 3.x | Framework supersônico |
-| **JAX-RS** | 3.x | REST API |
-| **CDI** | 4.x | Injeção de dependência |
-| **REST Client** | 3.x | Cliente HTTP |
-| **JUnit 5** | 5.x | Testes unitários |
-| **Mockito** | 5.x | Mocks para testes |
-
-### Frontend
-| Tecnologia | Versão | Descrição |
-|------------|--------|-----------|
-| **React** | 18.x | Biblioteca UI |
-| **TypeScript** | 5.x | Tipagem estática |
-| **Vite** | 5.x | Build tool |
-| **Tailwind CSS** | 3.x | Framework CSS |
-| **Lucide React** | Latest | Ícones |
-
-### Banco de Dados
-| Tecnologia | Versão | Descrição |
-|------------|--------|-----------|
-| **PocketBase** | 0.22+ | Backend completo |
-| **SQLite** | 3.x | Banco de dados |
-
----
-
-## 🏗️ Arquitetura
-
-```
-javaflix/
-├── src/main/java/br/com/javaflix/
-│   ├── client/              # Cliente PocketBase
-│   │   ├── PocketBaseClient.java
-│   │   └── dto/             # Data Transfer Objects
-│   ├── resource/            # Endpoints REST
-│   │   ├── JavaFlixResource.java
-│   │   └── AuthResource.java
-│   ├── service/             # Lógica de negócio
-│   │   └── ConteudoService.java
-│   ├── Conteudo.java        # Classe abstrata
-│   ├── Filme.java           # Herança
-│   ├── Serie.java           # Herança
-│   ├── Usuario.java         # Modelo de usuário
-│   └── PlataformaStreaming.java
-├── frontend/
-│   ├── src/
-│   │   ├── components/      # Componentes React
-│   │   ├── pages/           # Páginas
-│   │   ├── services/        # API client
-│   │   └── types.ts         # Tipos TypeScript
-│   └── package.json
-├── docs/                    # Documentação
-├── pb_data/                 # Dados PocketBase
-└── pom.xml
-```
-
-### Diagrama de Arquitetura
-
-```mermaid
-graph TB
-    Client[React Frontend<br/>Port 5173]
-    Backend[Quarkus Backend<br/>Port 8080]
-    PB[PocketBase<br/>Port 8090]
-    
-    Client -->|HTTP REST| Backend
-    Backend -->|REST Client| PB
-    PB -->|SQLite| DB[(Database)]
-    
-    Backend -->|parallelStream| Parallel[Processamento<br/>Paralelo]
-    Backend -->|CompletableFuture| Async[Operações<br/>Assíncronas]
-```
-
----
-
-## 📦 Instalação
-
-### Pré-requisitos
-
-- **Java JDK 17+** ([Download](https://www.oracle.com/java/technologies/downloads/))
-- **Node.js 18+** ([Download](https://nodejs.org/))
-- **Maven 3.8+** (incluído via wrapper)
-- **PocketBase** ([Download](https://pocketbase.io/docs/))
-
-### 1. Baixar o Projeto
+**Pre-requisito:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e em execucao.
 
 ```bash
-# Clone ou baixe o projeto
+# 1. Clonar o repositorio
+git clone https://github.com/SEU_USUARIO/javaflix.git
+cd javaflix
+
+# 2. Subir toda a pilha (backend, frontend, Redis, PocketBase)
+docker compose up -d
+
+# 3. Aguardar todos os containers ficarem healthy (aprox. 60 s no primeiro build)
+docker compose ps
+```
+
+### Acessar a aplicacao
+
+| Servico | URL |
+|---------|-----|
+| **Frontend** | http://localhost |
+| **Backend API** | http://localhost:8083/api |
+| **PocketBase Admin** | http://localhost:8090/_/ |
+| **Metricas Prometheus** | http://localhost:8083/q/metrics |
+
+### Parar a aplicacao
+
+```bash
+docker compose down
+```
+
+---
+
+## Desenvolvimento Local (sem Docker)
+
+### Pre-requisitos
+
+| Ferramenta | Versao minima | Link |
+|------------|--------------|------|
+| **Java JDK** | 17 | [Download](https://www.oracle.com/java/technologies/downloads/) |
+| **Node.js** | 18 | [Download](https://nodejs.org/) |
+| **Redis** | qualquer | [Download](https://redis.io/download/) |
+| **PocketBase** | 0.22 | [Download](https://pocketbase.io/docs/) |
+
+> Maven nao precisa ser instalado — o projeto inclui o wrapper `mvnw` / `mvnw.cmd`.
+
+---
+
+### 1. Clonar o repositorio
+
+```bash
+git clone https://github.com/SEU_USUARIO/javaflix.git
 cd javaflix
 ```
 
-### 2. Configurar PocketBase
+---
+
+### 2. Iniciar Redis
+
+```bash
+# Linux / macOS
+redis-server
+
+# Windows (via WSL ou executavel Redis para Windows)
+redis-server.exe
+```
+
+---
+
+### 3. Iniciar PocketBase
 
 #### Windows (PowerShell)
 ```powershell
-# Baixar PocketBase
-Invoke-WebRequest -Uri "https://github.com/pocketbase/pocketbase/releases/download/v0.22.0/pocketbase_0.22.0_windows_amd64.zip" -OutFile "pocketbase.zip"
-Expand-Archive -Path "pocketbase.zip" -DestinationPath "."
-
-# Iniciar PocketBase
 .\pocketbase.exe serve --http="127.0.0.1:8090"
 ```
 
-#### Linux/Mac
+#### Linux / macOS
 ```bash
-# Baixar e extrair
-wget https://github.com/pocketbase/pocketbase/releases/download/v0.22.0/pocketbase_0.22.0_linux_amd64.zip
-unzip pocketbase_0.22.0_linux_amd64.zip
-
-# Iniciar PocketBase
 ./pocketbase serve --http="127.0.0.1:8090"
 ```
 
-#### Configurar Collections
+Acesse http://127.0.0.1:8090/_/, crie um admin e importe as collections (veja `docs/pocketbase_setup.md`).
 
-1. Acesse: http://127.0.0.1:8090/_/
-2. Crie um admin (email/senha)
-3. Importe as collections (veja `docs/pocketbase_setup.md`)
+---
 
-### 3. Instalar Dependências do Frontend
+### 4. Iniciar o Backend (Quarkus)
+
+#### Linux / macOS
+```bash
+./mvnw quarkus:dev
+```
+
+#### Windows
+```cmd
+mvnw.cmd quarkus:dev
+```
+
+O backend sobe em **http://localhost:8081**.
+
+---
+
+### 5. Iniciar o Frontend (React)
 
 ```bash
 cd frontend
 npm install
-```
-
----
-
-## 🚀 Execução
-
-### Modo Desenvolvimento (Recomendado)
-
-#### Terminal 1: PocketBase
-```bash
-./pocketbase serve --http="127.0.0.1:8090"
-```
-
-#### Terminal 2: Backend (Quarkus)
-```bash
-cd javaflix
-./mvnw quarkus:dev
-```
-Ou no Windows:
-```bash
-mvnw.cmd quarkus:dev
-```
-
-#### Terminal 3: Frontend (React)
-```bash
-cd frontend
 npm run dev
 ```
 
-### Acessar a Aplicação
-
-- **Frontend:** http://localhost:5173
-- **Backend API:** http://localhost:8080/api
-- **PocketBase Admin:** http://127.0.0.1:8090/_/
-- **Swagger UI:** http://localhost:8080/q/swagger-ui
+O frontend sobe em **http://localhost:5173**.
 
 ---
 
-## 📚 Documentação
+### URLs em modo desenvolvimento
 
-### Documentos Disponíveis
-
-| Documento | Descrição |
-|-----------|-----------|
-| [Manual do Usuário](docs/manual_usuario.md) | Guia completo de uso |
-| [Diagrama UML](docs/diagrama_uml.md) | Classes e relacionamentos |
-| [Diagrama de Arquitetura](docs/diagrama_arquitetura.md) | Visão geral do sistema |
-| [OpenAPI/Swagger](docs/openapi.yaml) | Especificação da API |
-| [Changelog](CHANGELOG.md) | Histórico de mudanças |
-| [Análise Final](ANALISE_FINAL_INFO_MD.md) | Status de implementação |
-| [Implementações Finais](IMPLEMENTACOES_FINAIS.md) | Últimas mudanças |
-
-### Guias Técnicos
-
-- **Setup PocketBase:** Configuração completa do banco
-- **Autenticação JWT:** Como funciona o sistema de auth
-- **Testes:** Como executar e criar novos testes
-- **Deploy:** Guia de produção
+| Servico | URL |
+|---------|-----|
+| **Frontend** | http://localhost:5173 |
+| **Backend API** | http://localhost:8081/api |
+| **Swagger UI** | http://localhost:8081/q/swagger-ui |
+| **Metricas Prometheus** | http://localhost:8081/q/metrics |
+| **PocketBase Admin** | http://127.0.0.1:8090/_/ |
 
 ---
 
-## 🧪 Testes
-
-### Executar Todos os Testes
+## Build para Producao (JAR)
 
 ```bash
-./mvnw test
+# Backend — gera target/quarkus-app/
+./mvnw package -DskipTests
+
+# Executar o JAR
+java -jar target/quarkus-app/quarkus-run.jar
+
+# Frontend — gera frontend/dist/
+cd frontend && npm run build
 ```
 
-### Executar Testes Específicos
+---
+
+## Testes
 
 ```bash
-# Testes unitários
+# Todos os testes
+./mvnw test
+
+# Classe especifica
 ./mvnw test -Dtest=ConteudoServiceTest
 
-# Testes de integração
-./mvnw test -Dtest=AuthResourceTest
-```
-
-### Cobertura de Testes
-
-```bash
+# Relatorio de cobertura (Jacoco)
 ./mvnw verify
-# Relatório em: target/site/jacoco/index.html
+# Relatorio em: target/site/jacoco/index.html
 ```
 
-### Estatísticas
-
-- **Total de Testes:** 21
-- **Testes Unitários:** 14
-- **Testes de Integração:** 7
-- **Cobertura:** ~75%
+**21 testes** — 14 unitarios (JUnit + Mockito) + 7 de integracao (REST Assured). Cobertura ~75%.
 
 ---
 
-## 🔌 API Endpoints
+## Arquitetura
 
-### Autenticação
-
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| POST | `/api/auth/login` | Login de usuário |
-| POST | `/api/auth/register` | Registro de usuário |
-| GET | `/api/auth/verify` | Verificar token JWT |
-| GET | `/api/auth/health` | Health check |
-
-### Conteúdos
-
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/api/conteudos` | Listar todos |
-| GET | `/api/conteudos/{id}` | Buscar por ID |
-| GET | `/api/conteudos/buscar?titulo={titulo}` | Buscar por título |
-| GET | `/api/conteudos/filtrar?genero={genero}` | Filtrar por gênero |
-| POST | `/api/conteudos` | Criar conteúdo |
-| PUT | `/api/conteudos/{id}` | Atualizar conteúdo |
-| DELETE | `/api/conteudos/{id}` | Remover conteúdo |
-
-### Avaliações
-
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| POST | `/api/conteudos/{id}/avaliar` | Avaliar conteúdo |
-| GET | `/api/conteudos/{id}/avaliacoes` | Listar avaliações |
-
-### Exemplos de Requisições
-
-#### Login
-```bash
-curl -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"user@example.com","password":"senha123"}'
+```
+javaflix/
++-- src/main/java/br/com/javaflix/
+|   +-- JavaFlixResource.java       # Endpoints @Path("/api") + Micrometer @Timed
+|   +-- PlataformaStreaming.java     # Logica async (CompletableFuture, ExecutorService)
+|   +-- Conteudo.java               # Classe abstrata
+|   +-- Filme.java / Serie.java     # Heranca
+|   +-- service/
+|   |   +-- ConteudoService.java    # CRUD + filtros paralelos + @CacheResult
+|   +-- metrics/
+|   |   +-- PerformanceMetrics.java # Facade Micrometer
+|   +-- client/
+|   |   +-- PocketBaseClient.java   # REST Client para PocketBase
+|   +-- config/
+|       +-- ThreadPoolConfig.java   # ExecutorService "javaflixExecutor"
++-- frontend/                       # React 19 + TypeScript + Vite + Tailwind
++-- src/main/resources/
+|   +-- application.properties      # Porta 8081, Redis, JWT, thread pool
++-- docker-compose.yml              # 4 servicos: backend, frontend, redis, pocketbase
++-- Dockerfile                      # Multi-stage: Maven 3.9 -> JRE 17 Alpine
++-- pom.xml                         # Quarkus 3.32.4, Java 17
 ```
 
-#### Listar Conteúdos
-```bash
-curl http://localhost:8080/api/conteudos
-```
+### Topologia Docker
 
-#### Buscar por Título
-```bash
-curl "http://localhost:8080/api/conteudos/buscar?titulo=Matrix"
+```
+React (Nginx :80)
+       | REST/JSON
+Quarkus Backend (:8083 -> 8081)
+   +-- Redis (:6379)      <- @CacheResult / @CacheInvalidateAll
+   +-- PocketBase (:8090) <- SQLite + REST Client
 ```
 
 ---
 
-## 📦 Build e Deploy
+## API Endpoints
 
-### Build para Produção
+### Catalogo
 
-#### Backend (JAR)
-```bash
-./mvnw package
-java -jar target/quarkus-app/quarkus-run.jar
-```
+| Metodo | Endpoint | Auth | Descricao |
+|--------|----------|------|-----------|
+| GET | `/api/catalogo` | Publico | Listar todos os conteudos |
+| GET | `/api/buscar?q={titulo}` | Publico | Buscar por titulo |
+| GET | `/api/recomendacoes` | JWT | Recomendacoes assincronas |
+| POST | `/api/transcodificar` | Admin | Disparar transcodificacao CPU-bound |
+| POST | `/api/notificacoes` | Admin | Enviar push para assinantes |
+| GET | `/api/metrics/custom` | Publico | Listar medidores Micrometer |
 
-#### Backend (Uber-JAR)
-```bash
-./mvnw package -Dquarkus.package.jar.type=uber-jar
-java -jar target/*-runner.jar
-```
+### Observabilidade
 
-#### Backend (Nativo)
-```bash
-./mvnw package -Dnative
-./target/streaming-api-1.0.0-SNAPSHOT-runner
-```
-
-#### Frontend
-```bash
-cd frontend
-npm run build
-# Arquivos em: dist/
-```
-
-### Docker (Futuro)
-
-```bash
-docker build -f src/main/docker/Dockerfile.jvm -t javaflix-backend .
-docker run -p 8080:8080 javaflix-backend
-```
+| Endpoint | Descricao |
+|----------|-----------|
+| `GET /q/metrics` | Metricas Prometheus (timers, counters) |
+| `GET /q/health` | Health check Quarkus |
 
 ---
 
-## 🎓 Conceitos Demonstrados
+## Funcionalidades
 
-### Programação Orientada a Objetos
-- ✅ **Herança:** `Filme` e `Serie` herdam de `Conteudo`
-- ✅ **Polimorfismo:** Interface `Avaliavel`
-- ✅ **Encapsulamento:** Atributos privados com getters/setters
-- ✅ **Abstração:** Classe abstrata `Conteudo`
+### Backend
+- API REST com Quarkus 3.32 (JAX-RS + CDI)
+- Autenticacao JWT delegada ao PocketBase
+- Cache Redis declarativo (`@CacheResult` / `@CacheInvalidateAll`, TTL 5 min)
+- Processamento paralelo com `CompletableFuture.allOf()` e pool dedicado (`javaflixExecutor`)
+- Observabilidade via Micrometer + Prometheus (`@Timed`, `Counter`, `Timer.Sample`)
+- Fallback automatico para mock in-memory se PocketBase indisponivel
 
-### Concorrência e Paralelismo
-- ✅ **parallelStream():** Busca e filtros paralelos
-- ✅ **CompletableFuture:** Operações assíncronas
-- ✅ **Thread Safety:** Sincronização adequada
-- ✅ **Processamento Paralelo:** Múltiplas threads
-
-### Arquitetura e Design
-- ✅ **REST API:** Endpoints bem definidos
-- ✅ **DTO Pattern:** Separação de camadas
-- ✅ **Service Layer:** Lógica de negócio isolada
-- ✅ **Dependency Injection:** CDI do Quarkus
-- ✅ **Error Handling:** Tratamento robusto
+### Frontend
+- React 19 + TypeScript + Vite + Tailwind CSS
+- Sistema de perfis Netflix-style (ate 5 perfis)
+- Player de video customizado (react-player)
+- Busca em tempo real com filtros
+- Sistema de notificacoes
 
 ---
 
-## 📊 Métricas do Projeto
+## Conceitos Academicos Demonstrados
 
-| Métrica | Valor |
+| Area | Implementacao |
+|------|--------------|
+| **OOP** | `Conteudo` abstrata, `Filme`/`Serie` heranca, `Avaliavel` interface |
+| **Concorrencia** | `CompletableFuture.supplyAsync()` + `allOf()`, pool isolado |
+| **Paralelismo** | `filtrarPorGenerosParalelo()` — N generos em paralelo com barreira de sincronizacao |
+| **Cache** | Redis com TTL 5 min, invalidacao automatica em escrita |
+| **Observabilidade** | Histogramas p50/p95/p99 por endpoint via Micrometer/Prometheus |
+| **Testes** | JUnit 5 + Mockito + REST Assured, 21 casos, ~75% cobertura |
+
+---
+
+## Metricas do Projeto
+
+| Metrica | Valor |
 |---------|-------|
-| **Linhas de Código Java** | ~1,500 |
-| **Linhas de Código TypeScript** | ~900 |
-| **Linhas de Documentação** | ~5,000 |
-| **Testes Automatizados** | 21 |
-| **Cobertura de Testes** | ~75% |
-| **Collections PocketBase** | 3 |
-| **Endpoints REST** | 15+ |
-| **Componentes React** | 8 |
+| Linhas Java | ~1.500 |
+| Linhas TypeScript | ~900 |
+| Testes automatizados | 21 |
+| Cobertura | ~75% |
+| Endpoints REST | 6 |
+| Componentes React | 8 |
+| Versao | 1.1.0 |
 
 ---
 
-## 📄 Licença
+## Equipe
 
-Este projeto é um trabalho acadêmico desenvolvido para fins educacionais.
-
-**Universidade:** Unieuro  
-**Curso:** Sistemas de Informação  
-**Disciplina:** PROJETO INTEGRADOR DE COMPUTAÇÃO PARALELA
+Matheus Nery . Marcelo Vaz . Gabriel
+**Unieuro — Sistemas de Informacao — Computacao Paralela e Concorrente**
 
 ---
 
-## 👥 Equipe
-
-Matheus Nery, Marcelo Vaz, Gabriel
-
----
-
-## 🔗 Links Úteis
-
-- [Quarkus Documentation](https://quarkus.io/guides/)
-- [React Documentation](https://react.dev/)
-- [PocketBase Documentation](https://pocketbase.io/docs/)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [Tailwind CSS](https://tailwindcss.com/docs)
-
----
-
-## 📞 Suporte
-
-Para dúvidas ou problemas, consulte a [documentação](docs/) completa do projeto.
-
----
-
-**Última atualização:** 2026-04-06
-**Versão:** 1.1.0
-**Status:** ✅ Produção
-
----
-
-## 🆕 Novidades da Versão 1.1.0
-
-### Sistema de Perfis Netflix-Style
-- Seleção de perfis na tela inicial
-- Até 5 perfis por conta
-- Avatares personalizados
-- Perfis infantis com restrições
-- Troca de perfil a qualquer momento
-
-### Interface Aprimorada
-- Modal de busca funcional
-- Sistema de notificações
-- Preferências de conta completas
-- VideoPlayer com controles Netflix red
-- Espaçamento e alinhamento perfeitos
-
-Veja o [CHANGELOG.md](CHANGELOG.md) para detalhes completos!
+**Versao:** 1.1.0 . **Atualizado:** 2026-04-06

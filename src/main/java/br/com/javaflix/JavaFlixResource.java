@@ -131,16 +131,30 @@ public class JavaFlixResource {
         return Response.ok()
             .entity("{\n" +
                 "  \"info\": \"Métricas disponíveis em /q/metrics (Prometheus format)\",\n" +
-                "  \"custom_metrics\": [\n" +
+                "  \"endpoint_timers\": [\n" +
+                "    \"javaflix_catalogo_seconds\",\n" +
+                "    \"javaflix_buscar_seconds\",\n" +
+                "    \"javaflix_recomendacoes_seconds\",\n" +
+                "    \"javaflix_transcodificar_seconds\",\n" +
+                "    \"javaflix_notificacoes_seconds\"\n" +
+                "  ],\n" +
+                "  \"endpoint_counters\": [\n" +
                 "    \"javaflix_catalogo_requests_total\",\n" +
                 "    \"javaflix_buscar_success_total\",\n" +
                 "    \"javaflix_buscar_errors_total\",\n" +
                 "    \"javaflix_recomendacoes_requests_total\",\n" +
                 "    \"javaflix_transcodificar_requests_total\",\n" +
-                "    \"javaflix_notificacoes_requests_total\",\n" +
-                "    \"javaflix_catalogo_seconds\",\n" +
-                "    \"javaflix_buscar_seconds\",\n" +
-                "    \"javaflix_recomendacoes_seconds\"\n" +
+                "    \"javaflix_notificacoes_requests_total\"\n" +
+                "  ],\n" +
+                "  \"service_timers\": [\n" +
+                "    \"javaflix_service_listarTodos_seconds\",\n" +
+                "    \"javaflix_service_buscarPorTitulo_seconds\",\n" +
+                "    \"javaflix_service_filtrarPorGenero_seconds\",\n" +
+                "    \"javaflix_service_filtrarPorGenerosParalelo_seconds\",\n" +
+                "    \"javaflix_service_criar_seconds\",\n" +
+                "    \"javaflix_service_atualizar_seconds\",\n" +
+                "    \"javaflix_service_remover_seconds\",\n" +
+                "    \"javaflix_service_buscarParalelo_seconds\"\n" +
                 "  ]\n" +
                 "}")
             .build();
