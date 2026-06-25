@@ -9,12 +9,25 @@ services:
       - ./pb_data:/pb/pb_data
       - ./pb_migrations:/pb/pb_migrations
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8090/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
     ports:
       - "6379:6379"
     restart: unless-stopped
+    # Desativa persistencia em disco - dev nao precisa de RDB/AOF, elimina fsync lento
+    command: redis-server --save "" --appendonly no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 2s
+      retries: 5
 
   backend:
     build:
@@ -25,9 +38,17 @@ services:
     environment:
       - QUARKUS_PROFILE=prod
     depends_on:
-      - pocketbase
-      - redis
+      pocketbase:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/q/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
 
   frontend:
     build:
@@ -36,5 +57,6 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped

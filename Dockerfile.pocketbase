@@ -1,7 +1,9 @@
-FROM alpine:latest
-RUN apk add --no-cache ca-certificates unzip wget
-RUN wget https://github.com/pocketbase/pocketbase/releases/download/v0.22.0/pocketbase_0.22.0_linux_amd64.zip \
-    && unzip pocketbase_0.22.0_linux_amd64.zip -d /usr/local/bin \
+# Usa digest fixo para cache perfeito — alpine:latest muda a cada pull e invalida o cache
+FROM alpine:3.19
+# Une todos os RUN em um único layer: instala, baixa, extrai e limpa na mesma camada
+RUN apk add --no-cache ca-certificates unzip wget \
+    && wget -q https://github.com/pocketbase/pocketbase/releases/download/v0.22.0/pocketbase_0.22.0_linux_amd64.zip \
+    && unzip -q pocketbase_0.22.0_linux_amd64.zip -d /usr/local/bin \
     && rm pocketbase_0.22.0_linux_amd64.zip
 WORKDIR /pb
 EXPOSE 8090

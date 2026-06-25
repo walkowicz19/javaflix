@@ -1,12 +1,23 @@
-# Stage 1: Build — Node 22 LTS (mínimo exigido pelo Vite 7 e @types/node 24)
-FROM node:22-alpine AS build
+# ──────────────────────────────────────────────────────────
+# Stage 1: Dependências (camada cacheável separada do código)
+# ──────────────────────────────────────────────────────────
+FROM node:22-alpine AS deps
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
+# Copia APENAS manifests — só invalida esta camada se mudar dependências
+COPY package.json package-lock.json ./
+# --prefer-offline usa cache npm local quando disponível; --no-audit/fund elimina requests extras
+RUN npm ci --prefer-offline --no-audit --no-fund
+
+# ──────────────────────────────────────────────────────────
+# Stage 2: Build (re-usa node_modules cacheados)
+# ──────────────────────────────────────────────────────────
+FROM deps AS build
 COPY . .
 RUN npm run build
 
-# Stage 2: Runtime
+# ──────────────────────────────────────────────────────────
+# Stage 3: Runtime Nginx mínimo
+# ──────────────────────────────────────────────────────────
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
