@@ -1,14 +1,16 @@
 package br.com.javaflix;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class Conteudo implements Avaliavel {
     // Atributos (R2)
     private String titulo;
     private String genero;
     private int classificacaoEtaria; // Ex: 10, 12, 16, 18 anos
-    private List<Double> avaliacoes = new ArrayList<>();
+    // CopyOnWriteArrayList: avaliacoes são leitura-intensiva; protege de race condition
+    // em cenários de 500+ avaliadores simultâneos sem exigir synchronized.
+    private final List<Double> avaliacoes = new CopyOnWriteArrayList<>();
 
     public Conteudo(String titulo, String genero, int classificacaoEtaria) {
         if (titulo == null || titulo.trim().isEmpty()) {

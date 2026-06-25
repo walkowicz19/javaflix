@@ -1,10 +1,10 @@
 package br.com.javaflix;
 
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.annotation.PostConstruct;
 
@@ -19,7 +19,9 @@ public class PlataformaStreaming {
     private static final Logger LOG = Logger.getLogger(PlataformaStreaming.class);
 
     private String nome;
-    private List<Conteudo> catalogo;
+    // CopyOnWriteArrayList: iterações não lançam ConcurrentModificationException
+    // mesmo com leitores simultâneos — catálogo é leitura-intensiva (~8 itens fixos).
+    private final List<Conteudo> catalogo = new CopyOnWriteArrayList<>();
 
     @Inject
     @Named("javaflixExecutor")
@@ -27,7 +29,7 @@ public class PlataformaStreaming {
 
     public PlataformaStreaming() {
         this.nome = "JavaFlix";
-        this.catalogo = new ArrayList<>();
+        // catalogo já inicializado como CopyOnWriteArrayList no campo
     }
 
     @PostConstruct
