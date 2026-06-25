@@ -1,30 +1,34 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Bell, X } from 'lucide-react';
 import { Navbar } from "./components/Navbar";
 import { Hero } from "./components/Hero";
 import { Row } from "./components/Row";
-import { getCatalogo } from "./services/api";
+import { useCatalogo } from "./hooks/useCatalogo";
+import { useModal } from "./hooks/useModal";
 import type { Conteudo, Filme, Serie } from "./types";
 
 function App() {
   const navigate = useNavigate();
-  const [catalogo, setCatalogo] = useState<Conteudo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [modal, setModal] = useState<null | { type: string; data?: any }>(null);
-  const [selected, setSelected] = useState<Conteudo | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Conteudo[]>([]);
-  const [userTab, setUserTab] = useState<'preferences' | 'plan'>('preferences');
 
-  useEffect(() => {
-    const fetchCatalogo = async () => {
-      const data = await getCatalogo();
-      setCatalogo(data);
-      setLoading(false);
-    };
-    fetchCatalogo();
-  }, []);
+  // Dados: fetch + loading state
+  const { catalogo, loading } = useCatalogo();
+
+  // UI: estado de modais, seleção e busca
+  const {
+    modal,
+    selected,
+    searchQuery,
+    setSearchQuery,
+    userTab,
+    setUserTab,
+    openModal,
+    closeModal,
+    handleCardClick,
+  } = useModal();
+
+  // Aliases para compatibilidade com o JSX existente nos modais
+  const setModal = (v: { type: string } | null) => v ? openModal(v.type as any) : closeModal();
 
   if (loading) {
     return (
@@ -36,31 +40,27 @@ function App() {
     );
   }
 
-  // Filter content for rows
-  const filmes = catalogo.filter((c) => c.tipo === "Filme");
-  const series = catalogo.filter((c) => c.tipo === "Serie");
-  const dramas = catalogo.filter((c) =>
-    c.genero.toLowerCase().includes("drama")
-  );
-  const ficcao = catalogo.filter(
-    (c) =>
+  // Filtros derivados do catálogo — recalculados só quando catálogo muda
+  const filmes = useMemo(() => catalogo.filter((c) => c.tipo === "Filme"), [catalogo]);
+  const series = useMemo(() => catalogo.filter((c) => c.tipo === "Serie"), [catalogo]);
+  const dramas = useMemo(() => catalogo.filter((c) => c.genero.toLowerCase().includes("drama")), [catalogo]);
+  const ficcao = useMemo(() =>
+    catalogo.filter((c) =>
       c.genero.toLowerCase().includes("ficção") ||
       c.genero.toLowerCase().includes("ficcao")
-  );
+    ), [catalogo]);
 
-  // Handle search
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    if (query.trim()) {
-      const results = catalogo.filter(item =>
-        item.titulo.toLowerCase().includes(query.toLowerCase()) ||
-        item.genero.toLowerCase().includes(query.toLowerCase())
-      );
-      setSearchResults(results);
-    } else {
-      setSearchResults([]);
-    }
-  };
+  // Resultados de busca derivados do query
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return catalogo.filter(item =>
+      item.titulo.toLowerCase().includes(q) ||
+      item.genero.toLowerCase().includes(q)
+    );
+  }, [catalogo, searchQuery]);
+
+  const handleSearch = (query: string) => setSearchQuery(query);
 
   // Modal content
   const renderModal = () => {
@@ -92,10 +92,7 @@ function App() {
                     <div
                       key={index}
                       className="flex gap-4 p-3 bg-zinc-800 rounded-lg hover:bg-zinc-700 cursor-pointer transition"
-                      onClick={() => {
-                        setSelected(item);
-                        setModal({ type: "details" });
-                      }}
+                      onClick={() => handleCardClick(item)}
                     >
                       <div className="w-20 h-28 bg-zinc-700 rounded flex-shrink-0"></div>
                       <div className="flex-1">
@@ -474,12 +471,6 @@ function App() {
       );
     }
     return null;
-  };
-
-  // Card click handler
-  const handleCardClick = (item: Conteudo) => {
-    setSelected(item);
-    setModal({ type: "details" });
   };
 
   return (
